@@ -2,6 +2,8 @@
 
 A public, noncommercial Uganda rain explorer with hourly forecasts, animated Meteosat cloud imagery, a reproducible experimental model, and sourced dataset research.
 
+**[Open the live website](https://uganda-rain-atlas.vercel.app/)** · **[GitHub repository](https://github.com/itej13/uganda-rain-atlas)**
+
 ## What works
 
 - Hourly rain probability, rainfall amount, cloud cover, humidity, temperature and wind for 16 towns. Search a town or click a location within Uganda for a forecast.
@@ -63,7 +65,7 @@ vercel link --yes --project uganda-rain-atlas
 vercel --prod
 ```
 
-Connect the GitHub repository in Vercel to deploy subsequent commits. The included GitHub workflow runs tests and builds each push and pull request.
+The GitHub repository is connected to the Vercel project: pushes to `main` deploy to production. The included GitHub workflow runs tests and builds each push and pull request.
 
 `/api/forecast` returns the town batch; `?lat=0.35&lon=32.58` returns a validated Uganda point. `/api/satellite` discovers capture timestamps; `/api/satellite-image?time=<UTC-ISO>` retrieves a fixed-layer image. Fixed upstream hosts, bounded image/time parameters, request timeouts, null preservation and no-store error responses are enforced. Forecasts cache for 10 minutes and satellite metadata for 5 minutes. The website refreshes while open every 15 minutes; this does not imply providers generate new data on every refresh.
 
