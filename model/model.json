@@ -1,0 +1,438 @@
+{
+  "version": "1.0.0",
+  "name": "Uganda experimental ERA5 rain baseline",
+  "status": "experimental_reanalysis_only",
+  "trained_at": "2026-09-15T19:41:19.508965+00:00",
+  "algorithm": "L2 logistic regression",
+  "target": {
+    "variable": "ERA5 precipitation",
+    "operator": ">",
+    "threshold_mm": 0.1,
+    "horizon_hours": 1,
+    "interval": "(input_time, input_time + 1 hour]",
+    "ground_truth": "ERA5 reanalysis grid estimate, not a station observation"
+  },
+  "feature_names": [
+    "log1p_precipitation_mm",
+    "relative_humidity_percent",
+    "temperature_celsius",
+    "cloud_cover_percent",
+    "wind_speed_kmh",
+    "local_hour_sin",
+    "local_hour_cos",
+    "local_month_sin",
+    "local_month_cos"
+  ],
+  "feature_formula": "[log1p(precipitation_mm), relative_humidity_percent, temperature_celsius, cloud_cover_percent, wind_speed_kmh, sin(2*pi*local_hour/24), cos(2*pi*local_hour/24), sin(2*pi*(local_month-1)/12), cos(2*pi*(local_month-1)/12)]",
+  "time_basis": "Input timestamp is UTC; add 3 hours before extracting local hour and local month (1-12). Use the latest completed hourly input, never a later feature.",
+  "inference_formula": "p = 1 / (1 + exp(-(intercept + sum(coefficients[i] * (features[i] - scaler.mean[i]) / scaler.scale[i]))))",
+  "scaler": {
+    "mean": [
+      0.15825303309206046,
+      71.52033289631191,
+      23.194474149233248,
+      66.33979364988885,
+      6.4455851336713605,
+      -2.8501396568461467e-05,
+      -4.936586694323764e-05,
+      -0.002785245467519254,
+      -0.003611345213046703
+    ],
+    "scale": [
+      0.3612345248020925,
+      17.024806780161562,
+      3.3277517357998025,
+      32.06112653680575,
+      3.4913137672981724,
+      0.7071168573058384,
+      0.7070967026261638,
+      0.706879570397462,
+      0.7073192161592908
+    ]
+  },
+  "intercept": -1.6976568569859296,
+  "coefficients": [
+    1.9163656802299018,
+    1.1272176745333427,
+    0.8489592333259796,
+    0.41324809602757756,
+    -0.22023086190776736,
+    0.0733250203498205,
+    -0.2215518262267947,
+    0.001637236154677995,
+    0.019415381531094077
+  ],
+  "training": {
+    "sites": [
+      "kampala",
+      "gulu",
+      "mbale",
+      "mbarara",
+      "arua"
+    ],
+    "target_years": [
+      2023,
+      2024
+    ],
+    "sample_count": 87715,
+    "rain_frequency": 0.21893632788006612,
+    "l2_on_mean_loss": 0.001,
+    "optimizer": "Newton method with backtracking, intercept unpenalized",
+    "iterations": 7,
+    "random_split": false,
+    "hyperparameter_selection": "Fixed before evaluation; no test-set tuning",
+    "scaler_fit": "Training rows only"
+  },
+  "evaluation": {
+    "temporal_2025": {
+      "sample_count": 43800,
+      "rain_frequency": 0.20089041095890411,
+      "target_start_utc": "2025-01-01T00:00:00Z",
+      "target_end_utc": "2025-12-31T23:00:00Z",
+      "logistic_regression": {
+        "brier": 0.08221549492790957,
+        "log_loss": 0.2819290423146911
+      },
+      "train_climatology": {
+        "brier": 0.1608591088611922,
+        "log_loss": 0.5026062432778395
+      },
+      "train_monthly_climatology": {
+        "brier": 0.15969951836702276,
+        "log_loss": 0.496409072719735
+      },
+      "persistence": {
+        "brier": 0.10111872146118721,
+        "log_loss": 1.3970076628351549
+      },
+      "train_transition_persistence": {
+        "brier": 0.08523025116049258,
+        "log_loss": 0.30204471970437224
+      },
+      "brier_skill_vs_climatology": 0.488897486067422,
+      "brier_skill_vs_transition_persistence": 0.035371903655500025,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 25549,
+          "mean_probability": 0.04452374385138735,
+          "observed_era5_frequency": 0.03354338721672081
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 8192,
+          "mean_probability": 0.1383146295955215,
+          "observed_era5_frequency": 0.1416015625
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 2347,
+          "mean_probability": 0.2418049102192085,
+          "observed_era5_frequency": 0.3293566254793353
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 1105,
+          "mean_probability": 0.3465054240523344,
+          "observed_era5_frequency": 0.5004524886877828
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 778,
+          "mean_probability": 0.4468390183376217,
+          "observed_era5_frequency": 0.6619537275064268
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 666,
+          "mean_probability": 0.5475891590130234,
+          "observed_era5_frequency": 0.7342342342342343
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 613,
+          "mean_probability": 0.6502627085665337,
+          "observed_era5_frequency": 0.7536704730831973
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 663,
+          "mean_probability": 0.750557028433945,
+          "observed_era5_frequency": 0.799396681749623
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 848,
+          "mean_probability": 0.8539551233831577,
+          "observed_era5_frequency": 0.8290094339622641
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 3039,
+          "mean_probability": 0.973089023513956,
+          "observed_era5_frequency": 0.9072063178677197
+        }
+      ]
+    },
+    "unseen_moroto_2025": {
+      "sample_count": 8760,
+      "rain_frequency": 0.0932648401826484,
+      "target_start_utc": "2025-01-01T00:00:00Z",
+      "target_end_utc": "2025-12-31T23:00:00Z",
+      "logistic_regression": {
+        "brier": 0.04817740685820634,
+        "log_loss": 0.17414477032921005
+      },
+      "train_climatology": {
+        "brier": 0.10035983258843564,
+        "log_loss": 0.36571989234841545
+      },
+      "train_monthly_climatology": {
+        "brier": 0.10465370788321282,
+        "log_loss": 0.37024543830219414
+      },
+      "persistence": {
+        "brier": 0.05730593607305936,
+        "log_loss": 0.7917117075450887
+      },
+      "train_transition_persistence": {
+        "brier": 0.04920396638993911,
+        "log_loss": 0.19766206245713544
+      },
+      "brier_skill_vs_climatology": 0.5199532958990032,
+      "brier_skill_vs_transition_persistence": 0.020863349177936974,
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 7218,
+          "mean_probability": 0.02931831593581876,
+          "observed_era5_frequency": 0.02396785813244666
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 814,
+          "mean_probability": 0.1357206867432812,
+          "observed_era5_frequency": 0.15601965601965603
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 205,
+          "mean_probability": 0.24166586344475807,
+          "observed_era5_frequency": 0.45365853658536587
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 90,
+          "mean_probability": 0.34087109427827095,
+          "observed_era5_frequency": 0.6222222222222222
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 52,
+          "mean_probability": 0.4434186590077909,
+          "observed_era5_frequency": 0.7307692307692307
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 52,
+          "mean_probability": 0.5443903101325287,
+          "observed_era5_frequency": 0.7884615384615384
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 49,
+          "mean_probability": 0.6514968584316843,
+          "observed_era5_frequency": 0.8163265306122449
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 58,
+          "mean_probability": 0.7520881038531644,
+          "observed_era5_frequency": 0.8103448275862069
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 67,
+          "mean_probability": 0.8521839772771334,
+          "observed_era5_frequency": 0.8656716417910447
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 155,
+          "mean_probability": 0.9698055706368538,
+          "observed_era5_frequency": 0.9290322580645162
+        }
+      ]
+    }
+  },
+  "baseline_parameters": {
+    "climatology_probability": 0.21893632788006612,
+    "transition_probability_after_dry_and_wet": [
+      0.06864691285943658,
+      0.7550637854725332
+    ],
+    "monthly_climatology_jan_to_dec": [
+      0.11123066577000673,
+      0.12514619883040937,
+      0.2581989247311828,
+      0.31125,
+      0.2307795698924731,
+      0.19902777777777778,
+      0.17728494623655913,
+      0.1625,
+      0.2477777777777778,
+      0.2806451612903226,
+      0.35291666666666666,
+      0.17043010752688173
+    ],
+    "deterministic_persistence": "Probability 1 if input-hour precipitation > 0.1 mm, otherwise 0. Log-loss probabilities clipped to [1e-6, 1-1e-6]."
+  },
+  "sources": [
+    {
+      "site": "kampala",
+      "requested_latitude": 0.3476,
+      "requested_longitude": 32.5825,
+      "returned_latitude": 0.25,
+      "returned_longitude": 32.5,
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=0.3476&longitude=32.5825&start_date=2023-01-01&end_date=2025-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m&models=era5&timezone=GMT",
+      "cache_file": "kampala-2023-2025.json",
+      "sha256": "618aeff81eae9843c39f84a9683fb1f472f717ae9e8d321b120ef6ab1b76285b",
+      "retrieved_at": "2026-09-15T14:39:33.505868+00:00",
+      "hourly_records": 26304,
+      "dropped_pairs": 0
+    },
+    {
+      "site": "gulu",
+      "requested_latitude": 2.7724,
+      "requested_longitude": 32.2881,
+      "returned_latitude": 2.75,
+      "returned_longitude": 32.25,
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.7724&longitude=32.2881&start_date=2023-01-01&end_date=2025-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m&models=era5&timezone=GMT",
+      "cache_file": "gulu-2023-2025.json",
+      "sha256": "d093d91b04649f522d7fb569c7359c9b116e162424103bd4af4d78f7ae7fcbd3",
+      "retrieved_at": "2026-09-15T19:38:02.877731+00:00",
+      "hourly_records": 26304,
+      "dropped_pairs": 0
+    },
+    {
+      "site": "mbale",
+      "requested_latitude": 1.0644,
+      "requested_longitude": 34.1794,
+      "returned_latitude": 1.0,
+      "returned_longitude": 34.25,
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=1.0644&longitude=34.1794&start_date=2023-01-01&end_date=2025-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m&models=era5&timezone=GMT",
+      "cache_file": "mbale-2023-2025.json",
+      "sha256": "f8cdee12c8d1e6f908e3bb099885e67217c1c15f717d42e16f5048d98c1f30d7",
+      "retrieved_at": "2026-09-15T19:38:06.745012+00:00",
+      "hourly_records": 26304,
+      "dropped_pairs": 0
+    },
+    {
+      "site": "mbarara",
+      "requested_latitude": -0.6072,
+      "requested_longitude": 30.6545,
+      "returned_latitude": -0.5,
+      "returned_longitude": 30.75,
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=-0.6072&longitude=30.6545&start_date=2023-01-01&end_date=2025-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m&models=era5&timezone=GMT",
+      "cache_file": "mbarara-2023-2025.json",
+      "sha256": "debbd903d3cad4d2e59c24e10043b4eda2dbbb577df728561a38601b3eebf386",
+      "retrieved_at": "2026-09-15T19:38:09.890051+00:00",
+      "hourly_records": 26304,
+      "dropped_pairs": 0
+    },
+    {
+      "site": "arua",
+      "requested_latitude": 3.0201,
+      "requested_longitude": 30.9111,
+      "returned_latitude": 3.0,
+      "returned_longitude": 31.0,
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=3.0201&longitude=30.9111&start_date=2023-01-01&end_date=2025-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m&models=era5&timezone=GMT",
+      "cache_file": "arua-2023-2025.json",
+      "sha256": "3e09c8a4a2d287295f84c546d8cbfa844a7f31b0c8934eccfd31103cf430e37a",
+      "retrieved_at": "2026-09-15T19:38:17.856479+00:00",
+      "hourly_records": 26304,
+      "dropped_pairs": 0
+    },
+    {
+      "site": "moroto",
+      "requested_latitude": 2.5348,
+      "requested_longitude": 34.6666,
+      "returned_latitude": 2.5,
+      "returned_longitude": 34.75,
+      "url": "https://archive-api.open-meteo.com/v1/archive?latitude=2.5348&longitude=34.6666&start_date=2023-01-01&end_date=2025-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m&models=era5&timezone=GMT",
+      "cache_file": "moroto-2023-2025.json",
+      "sha256": "643a7aab373993aee2f2add192d3ff1bb61c1581a46192ae4a35d95a15c38997",
+      "retrieved_at": "2026-09-15T19:38:21.756067+00:00",
+      "hourly_records": 26304,
+      "dropped_pairs": 0
+    }
+  ],
+  "source_license": "Open-Meteo data CC BY 4.0; attribute Open-Meteo and Copernicus ERA5. API usage subject to provider terms.",
+  "limitations": [
+    "Labels and predictors are ERA5 reanalysis estimates, not independent local rain-gauge observations.",
+    "ERA5 is retrospective and can assimilate later information. This split prevents explicit feature/target leakage but is not an operational hindcast.",
+    "Serving with live numerical weather prediction inputs introduces unmeasured distribution shift; the test scores do not establish live forecast accuracy.",
+    "Only five training locations and one held-out location; no claim of Uganda-wide spatial validation.",
+    "Hourly grid-scale precipitation misses localized convection and sub-hourly onset; no satellite motion or radar is used.",
+    "One test year; hourly outcomes are correlated and no independent uncertainty interval is claimed.",
+    "Do not use for emergency warnings or safety-critical decisions. Compare operationally against a weather provider and independent observations first."
+  ],
+  "inference_examples": [
+    {
+      "site": "kampala",
+      "input_time_utc": "2024-12-31T23:00:00Z",
+      "target_time_utc": "2025-01-01T00:00:00Z",
+      "features": [
+        0.0,
+        64.0,
+        23.7,
+        93.0,
+        4.2,
+        0.49999999999999994,
+        0.8660254037844387,
+        0.0,
+        1.0
+      ],
+      "probability": 0.06831747003176737,
+      "era5_rain_label": 0
+    },
+    {
+      "site": "kampala",
+      "input_time_utc": "2025-01-01T11:00:00Z",
+      "target_time_utc": "2025-01-01T12:00:00Z",
+      "features": [
+        0.0,
+        62.0,
+        26.1,
+        91.0,
+        3.5,
+        -0.4999999999999998,
+        -0.8660254037844388,
+        0.0,
+        1.0
+      ],
+      "probability": 0.1576798530409263,
+      "era5_rain_label": 1
+    }
+  ]
+}
